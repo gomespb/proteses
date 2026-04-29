@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Comandas Próteses</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #0b0f1a;
+    color: #fff;
+  }
+
+  header {
+    background: #111827;
+    padding: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .container {
+    padding: 10px;
+    max-width: 1100px;
+    margin: auto;
+  }
+
+  .topo {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+
+  /* 🔘 MENU */
+  .menu {
+    margin-bottom: 15px;
+  }
+
+  .botao {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin: 8px 0;
+    background: linear-gradient(135deg, #19a7ce, #146c94);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+
+  .botao:hover {
+    transform: scale(1.03);
+  }
+
+  /* 🔥 TABELA */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  th, td {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th {
+    background: #111827;
+    font-weight: bold;
+  }
+
+  th:nth-child(1), td:nth-child(1) { width: 30%; }
+  th:nth-child(2), td:nth-child(2) { width: 25%; }
+  th:nth-child(3), td:nth-child(3) { width: 25%; }
+  th:nth-child(4), td:nth-child(4) { 
+    width: 20%; 
+    text-align: right;
+  }
+
+  .valor {
+    color: #22c55e;
+    font-weight: bold;
+    text-align: right;
+  }
+
+  .destaque {
+    color: #f59e0b;
+    font-weight: bold;
+    text-align: right;
+  }
+
+  /* MOBILE */
+  @media (max-width: 699px) {
+    table { display: none; }
+
+    .card {
+      background: #111827;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .linha {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+    }
+  }
+
+  /* PC */
+  @media (min-width: 700px) {
+    .cards { display: none; }
+  }
+</style>
+</head>
+
+<body>
+
+<header>Comandas Campinas</header>
+
+<div class="container">
+
+  <div class="topo">
+    <div id="atualizacao">Carregando...</div>
+  </div>
+
+  <!-- 🔘 MENU INSERIDO -->
+  <div class="menu">
+    <a href="https://script.google.com/macros/s/AKfycbxeeiN3KI9FbYGQBG1Yar1Mgw-4nTm7kfQayLwSbNpk1ld9aEFSdPQVT6fDcuJRVrLs/exec" class="botao">Cadastro/Pesquisa Assinaturas</a>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSdFIkKbnhaqvFeozVN2tBdM8vfZgEnxK8arZpFk0O40Meu4EA/viewform" class="botao">Formulário Renovação</a>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSeIXQ81DevD63ttydfUbe8rxachSK6oPXD5uDA1sjuYIBv1vA/viewform" class="botao">Comandas Campinas</a>
+  </div>
+
+  <!-- MOBILE -->
+  <div class="cards" id="cards"></div>
+
+  <!-- PC -->
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Barbeiro</th>
+        <th>FormaPG</th>
+        <th>Valor</th>
+      </tr>
+    </thead>
+    <tbody id="tabela"></tbody>
+  </table>
+
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwF6LYH0jY23jjF-pH_WGnq6OznGxwKVj7FD5qzy6_gbw0oC2zoYTmHl0H7Yrf68xJTHA/exec";
+
+function parseDataBR(dataStr) {
+  if (!dataStr) return new Date(0);
+  const partes = dataStr.split(" ");
+  if (partes.length >= 2) {
+    const [dia, mes, ano] = partes[0].split("/");
+    const hora = partes[1];
+    return new Date(`${ano}-${mes}-${dia}T${hora}`);
+  }
+  return new Date(dataStr);
+}
+
+function formatarValor(v) {
+  const num = parseFloat(v) || 0;
+
+  if (num === 1 || num === 2 || num === 3) {
+    return { texto: num, classe: "destaque" };
+  }
+
+  return {
+    texto: num.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    }),
+    classe: "valor"
+  };
+}
+
+function bloquearTela(msg) {
+  document.body.innerHTML = `
+    <div style="
+      display:flex;
+      height:100vh;
+      align-items:center;
+      justify-content:center;
+      background:#0b0f1a;
+      color:#fff;
+    ">
+      <h2>${msg}</h2>
+    </div>
+  `;
+}
+
+function carregarDados() {
+  const params = new URLSearchParams(window.location.search);
+  const acesso = params.get("acesso");
+
+  if (!acesso) {
+    bloquearTela("Acesso não autorizado");
+    return;
+  }
+
+  fetch(SCRIPT_URL + "?acesso=" + acesso)
+    .then(res => res.json())
+    .then(dados => {
+
+      if (dados.erro) {
+        bloquearTela("Acesso negado");
+        return;
+      }
+
+      dados.forEach(item => {
+        item.dataObj = parseDataBR(item.data);
+      });
+
+      dados.sort((a,b) => b.dataObj - a.dataObj);
+
+      document.getElementById("atualizacao").innerText =
+        "Atualizado: " + new Date().toLocaleTimeString("pt-BR");
+
+      let htmlCards = "";
+      let htmlTabela = "";
+
+      dados.forEach(item => {
+        const v = formatarValor(item.valor);
+
+        htmlCards += `
+          <div class="card">
+            <div class="linha"><span>Data:</span><span>${item.data}</span></div>
+            <div class="linha"><span>Barbeiro:</span><strong>${item.barbeiro}</strong></div>
+            <div class="linha"><span>Forma:</span><span>${item.forma}</span></div>
+            <div class="linha"><span>Valor:</span><span class="${v.classe}">${v.texto}</span></div>
+          </div>
+        `;
+
+        htmlTabela += `
+          <tr>
+            <td>${item.data}</td>
+            <td>${item.barbeiro}</td>
+            <td>${item.forma}</td>
+            <td class="${v.classe}">${v.texto}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById("cards").innerHTML = htmlCards;
+      document.getElementById("tabela").innerHTML = htmlTabela;
+
+    })
+    .catch(() => {
+      bloquearTela("Erro ao carregar");
+    });
+}
+
+setInterval(carregarDados, 10000);
+carregarDados();
+</script>
+
+</body>
+</html>
