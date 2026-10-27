@@ -86,6 +86,14 @@
     <a href="https://script.google.com/macros/s/AKfycbzsKH8WfgA0yAMT3ewR9NcCrwO890w3hhxJV8TswtlXqvg1sVND7Ix2zF67cz8OTSzz/exec" class="botao">Agendamento</a>
     <a href="https://script.google.com/macros/s/AKfycbzWvzEcl00LsD9GDh1JZZzTT0cOMI48M1B9Nahm8V3A9xowemnsQB452R9-OgjEh7kWjw/exec" class="botao">Cadastrar</a>
   </div>
+
+  <!-- 🔒 BOTÃO EXCLUSIVO FILIPE -->
+<div class="menu" id="menu-filipe" style="display:none;">
+  <a href="https://script.google.com/macros/s/AKfycbzwaZs1LzvV9nFySCizbY_tpfTfpW7lBTJzzASCh7lErXom5MwFh5aAEkaDVvLLpjjF/exec?acesso=domfilipe7237"
+     class="botao">
+    Controle Aplicação de Próteses
+  </a>
+</div>
   
   <!-- MOBILE -->
    <div class="cards" id="cards"></div>
@@ -135,6 +143,13 @@ function carregarDados() {
   if (autorizados.includes(acesso)) {
     document.getElementById('menu-especial').style.display = 'flex';
   }
+
+  // 🔒 BOTÃO EXCLUSIVO FILIPE
+const autorizadosFilipe = ['filipe199332'];
+
+if (autorizadosFilipe.includes(acesso)) {
+  document.getElementById('menu-filipe').style.display = 'block';
+}
 
   fetch(SCRIPT_URL + "?acesso=" + acesso)
     .then(res => res.json())
